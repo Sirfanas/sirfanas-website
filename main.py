@@ -5,10 +5,13 @@ from flask import request, render_template, url_for
 
 from flask_caching import Cache
 
+import models
+
+
 config = {
     "DEBUG": True,
     "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 300
+    "CACHE_DEFAULT_TIMEOUT": 300,
 }
 
 app = Flask(__name__)
@@ -63,12 +66,14 @@ def setLanguage():
 
 @app.route('/api/language', methods=['POST'])
 def getLanguage():
+    langs = models.Language().select()
+    available = dict()
+    for lang in langs:
+        available[lang['key']] = url_for('static', filename=lang['image'])
+    print(available)
     return {
         'current': cache.get('language'),
-        'available': {
-            'fr-FR': url_for('static', filename='img/flags/gf.svg'),
-            'en-EN': url_for('static', filename='img/flags/gb.svg'),
-        }
+        'available': available
     }
 
 

@@ -35,15 +35,17 @@
             </div>
         </nav>
         <div class="container-fluid bg-light">
-               <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" id="languageDropdown" type="button" data-bs-toggle="dropdown">
-                    Language Options
-                </button>
-                <ul id="languageDropdownOptions" class="dropdown-menu" aria-labelledby="languageDropdown">
-                </ul>
-              </div>
 
             {% block content %}{% endblock %}
         </div>
     </body>
+    <footer>
+       <div class="dropdown">
+        <button class="btn  dropdown-toggle" id="languageDropdown" type="button" data-bs-toggle="dropdown">
+            Language Options
+        </button>
+        <ul id="languageDropdownOptions" class="dropdown-menu" aria-labelledby="languageDropdown">
+        </ul>
+      </div>
+    </footer>
 </html>

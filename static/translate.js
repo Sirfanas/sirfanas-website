@@ -8,13 +8,13 @@ function fillLanguageSelector() {
     $.post({
         url: "/api/language",
         success: function(data) {
-            img = "<img src=\"" + data["available"][data["current"]] + "\"/>";
+            img = "<img height=\"50\" src=\"" + data["available"][data["current"]] + "\"/>";
             $("#languageDropdown").html(img);
 
             Object.entries(data["available"]).forEach(entry => {
                 const [key, value] = entry;
                 console.log(key, value);
-                content = "<li><input id=\"" + key + "\" type=\"image\" language=\"" + key + "\" src=\"" + value + "\"/></li>";
+                content = "<li><input height=\"50\" id=\"" + key + "\" type=\"image\" language=\"" + key + "\" src=\"" + value + "\"/></li>";
                 selection = $("#languageDropdownOptions");
                 selection.html(selection.html() + content);
             });
@@ -22,7 +22,6 @@ function fillLanguageSelector() {
             Object.entries(data["available"]).forEach(entry => {
                 const [key, value] = entry;
                 $("#" + key).click(function() {
-                    console.log("Clicked on " + this.id);
                     $.post({
                         url: "/api/setLanguage",
                         data: {
