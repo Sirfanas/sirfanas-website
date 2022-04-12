@@ -1,48 +1,41 @@
 # coding: utf-8
 
 from flask import Flask
-from flask import request, render_template, url_for
-
-from flask_caching import Cache
+from flask import redirect, request, render_template, session, url_for
 
 import models
 
 
 config = {
     "DEBUG": True,
-    "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 300,
+    "SECRET_KEY": 'secretlol',
 }
 
 app = Flask(__name__)
 app.config.from_mapping(config)
 
-cache = Cache(app)
+
+def build_page(page):
+    context = {'is_admin': False}
+    if user_logged_in():
+        context['is_admin'] = True
+    return render_template(page, **context)
 
 
 @app.route('/')
 def home():
-    return render_template('home.html.jinja2')
+    session.permanent = False
+    return build_page('home.html.jinja2')
 
 
 @app.route('/me')
 def me():
-    return render_template('me.html.jinja2')
+    return build_page('me.html.jinja2')
 
 
 def _translate(key):
-    language = cache.get('language') or 'fr-FR'
-    cache.set('language', language)
-    lang = {
-        'fr-FR': {
-            '//test': 'Test traduction en français',
-        },
-        'en-EN': {
-            '//test': 'Test traduction in english',
-        }
-    }
-    value = lang.get(language, dict()).get(key, 'Wrong translation key ! Please clean your cache (CTRL+SHIT+R)')
-    return value
+    language = session.get('language') or 'fr-FR'
+    return models.Translation().get_translation(language, key)
 
 
 @app.route('/api/translate', methods=['POST'])
@@ -55,26 +48,74 @@ def translate():
     """
     route = request.form.get('route')
     tid = request.form.get('tid')
-    return _translate('%s/%s' % (route, tid))
+    return _translate('%s%s' % (route, tid))
+
+
+@app.route('/api/translate/edit', methods=['POST'])
+def edit_translation():
+    """
+        Post parameters:
+            route: the current browser route to get its current page
+            tid: Translation id
+            content: Translated text
+        :return: Nothing
+    """
+    if not user_logged_in():
+        return ""
+    route = request.form.get('route')
+    tid = request.form.get('tid')
+    content = request.form.get('content')
+    language = session.get('language') or 'fr-FR'
+
+    models.Translation().apply_translations(language, route, tid, content)
+    return redirect(route)
 
 
 @app.route('/api/setLanguage', methods=['POST'])
-def setLanguage():
-    cache.set('language', request.form.get('language', 'fr-FR'))
+def set_language():
+    session['language'] = request.form.get('language', 'fr-FR')
     return {}
 
 
 @app.route('/api/language', methods=['POST'])
-def getLanguage():
+def get_language():
     langs = models.Language().select()
     available = dict()
     for lang in langs:
         available[lang['key']] = url_for('static', filename=lang['image'])
-    print(available)
     return {
-        'current': cache.get('language'),
+        'current': session.get('language', 'fr-FR'),
         'available': available
     }
+
+
+@app.route('/login')
+def login_page():
+    if user_logged_in():
+        return redirect('/')
+    return build_page('login.html.jinja2')
+
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    """
+        Post parameters:
+            login: the current browser route to get its current page
+            password: Translation id
+        :return: "refresh" if correct credentials else "no"
+    """
+    user = request.form.get('user')
+    password = request.form.get('password')
+    if models.User().check_password(user, password):
+        session["username"] = user
+        session["password"] = password
+    return redirect('/')
+
+
+def user_logged_in():
+    user = session.get("username")
+    password = session.get("password")
+    return models.User().check_password(user, password)
 
 
 app.run()

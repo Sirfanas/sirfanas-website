@@ -11,6 +11,10 @@
 
         <!-- Import our custom js files -->
         <script src="{{url_for('static', filename='translate.js')}}"></script>
+
+        {% if is_admin %}
+            <script src="{{url_for('static', filename='admin_control.js')}}"></script>
+        {% endif %}
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -35,17 +39,23 @@
             </div>
         </nav>
         <div class="container-fluid bg-light">
-
             {% block content %}{% endblock %}
         </div>
     </body>
     <footer>
-       <div class="dropdown">
-        <button class="btn  dropdown-toggle" id="languageDropdown" type="button" data-bs-toggle="dropdown">
-            Language Options
+        <div class="dropdown">
+            <button class="btn  dropdown-toggle" id="languageDropdown" type="button" data-bs-toggle="dropdown">
+            </button>
+            <ul id="languageDropdownOptions" class="dropdown-menu" aria-labelledby="languageDropdown">
+            </ul>
+        </div>
+        {% if is_admin %}
+        <button class="btn btn-primary" id="buttonToggleEdiTranslation" onclick="toggleEditTranslation()" confirm="test">
+            Edit translation
         </button>
-        <ul id="languageDropdownOptions" class="dropdown-menu" aria-labelledby="languageDropdown">
-        </ul>
-      </div>
+        <button class="btn btn-danger" id="applyTranslation" onclick="applyTranslation()" confirm="test">
+                Apply translation
+            </button>
+        {% endif %}
     </footer>
 </html>

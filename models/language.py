@@ -12,7 +12,8 @@ class Language(Model):
             {'image': 'TEXT'},
         ]
 
-#
-# l = Language()
-# l.create_table()
-# l.insert({'key': 'en-EN', 'image': 'img/flags/gb.svg'})
+    def get_by_key(self, key):
+        language_id = self.select("WHERE key = '%s'" % key)
+        if language_id:
+            return language_id[0]
+        raise KeyError('Language not found !')

@@ -13,7 +13,6 @@ function fillLanguageSelector() {
 
             Object.entries(data["available"]).forEach(entry => {
                 const [key, value] = entry;
-                console.log(key, value);
                 content = "<li><input height=\"50\" id=\"" + key + "\" type=\"image\" language=\"" + key + "\" src=\"" + value + "\"/></li>";
                 selection = $("#languageDropdownOptions");
                 selection.html(selection.html() + content);
@@ -37,23 +36,26 @@ function fillLanguageSelector() {
     });
 }
 
-function translateNode(nodeSelector) {
-    node = $(nodeSelector)
-
+function translateNode(i, node) {
+    node = $(node);
     $.post({
         url: "/api/translate",
         data: {
             route: window.location.pathname,
-            tid: "test",
+            tid: node.attr("id"),
         },
         success: function(data) {
-            node.text(data);
+            console.log(data);
+            if (data) {
+                node.html(data);
+            }
         }
     });
 }
 
+
 $(document).ready(function() {
-    nodes = findTranslateNode();
-    translateNode(nodes);
+    nodes = $(findTranslateNode());
+    nodes.each(translateNode);
     fillLanguageSelector();
 });
